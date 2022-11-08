@@ -1,0 +1,41 @@
+db.disney.aggregate([
+    {
+        $project:{
+            _id: 0,
+            show_id: 1,
+            description: 1
+        }
+    }
+])
+
+
+
+db.descriptions.aggregate([
+    {
+        $lookup: {
+            from: "disney",
+            localField: "show_id",
+            foreignField: "show_id",
+            as: "disney_data"
+        }
+    },
+    {
+        $project:{
+            _id: 0,
+            'show_id': 1,
+            description: 1,
+            disney_data: {
+                $arrayElemAt: ['$disney_data', 0]
+            }
+        }
+    },
+    {
+        $project:{
+            show_id: 1,
+            description: 1,
+            title: '$disney_data.title',
+            type: '$disney_data.type',
+            year: '$disney_data.release_year'
+        }
+    }
+])
